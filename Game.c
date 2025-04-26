@@ -8,6 +8,8 @@
 int ScreenX = 40;
 int ScreenY = 20;
 
+int maxAstroids = 5;
+
 //struct for the payer pos
 typedef struct {
     int x;
@@ -20,6 +22,41 @@ typedef struct {
     bool movable;
 } mapData;
 
+//struct for map pos data
+typedef struct {
+    int x;
+    int y;
+    int dx;
+    int dy;
+} astroidData;
+
+// funtion to generate astroids
+void genAstroids( astroidData *astroids){
+    for (int i; i < maxAstroids; i++){
+        int side = rand() % 4;
+
+        switch (side) {
+            case 0: // top
+            astroids[i].x = rand() % ScreenX;
+            astroids[i].y = 0;
+                break;
+            case 1: // right
+            astroids[i].x = ScreenX - 1;
+            astroids[i].y = rand() % ScreenY;
+                break;
+            case 2: // bottom
+            astroids[i].x = rand() % ScreenX;
+            astroids[i].y = ScreenY - 1;
+                break;
+            case 3: // left
+            astroids[i].x = 0;
+            astroids[i].y = rand() % ScreenY;
+                break;
+        }
+        astroids[i].dx = (rand() % 3) - 1;
+        astroids[i].dy = (rand() % 3) - 1;
+    }
+}
 // funtion to generate the map 
 void genMap(mapData *map){
     
@@ -44,19 +81,25 @@ void genMap(mapData *map){
 }
 
 //funtion to display the screen
-void loadScreen(player p, mapData *map) {
+void loadScreen(player *p, mapData *map, astroidData *astroids) {
 
     // looping through the 1d array 
     //using x and y to break in to 2d 
     for (int y = 0; y < ScreenY; y++) {
         for (int x = 0; x < ScreenX; x++) {
             int i = y * ScreenX + x;
-            if (p.x == x && p.y == y) {
+            if (p->x == x && p->y == y) {
                 printf("&"); //player symobol
             } else if (strcmp(map[i].type, "Trash") == 0) {
                 printf("#"); // trash
             } else {
                 printf("."); // empty space
+            }
+            for (int a = 0; a < maxAstroids; a++) {
+                if (astroids[a].x == x && astroids[a].y == y) {
+                    printf("O"); // asteroid symbol
+                    break; // stop checking other asteroids
+                }
             }
         }
         printf("\n");//new line 
@@ -74,12 +117,15 @@ int main() {
     player1.y = ScreenY/2; 
 
     mapData map[ScreenX * ScreenY];
+    astroidData astroids[maxAstroids];
+
+    genAstroids(astroids);
 
     genMap(map);
 
     //game loop (q to quit)
     while (input != 'q') {
-        loadScreen(player1, map);//loading the display with player pos
+        loadScreen(&player1, map, astroids);//loading the display with player pos
 
         //asking and taking the users input
         printf("use w/a/s/d to move, press q to quit: ");
