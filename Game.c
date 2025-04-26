@@ -2,44 +2,50 @@
 #include <stdlib.h>
 #include <time.h>
 
+// setting the size of the "display"
 int ScreenX = 40;
 int ScreenY = 20;
 
+//struct for the payer pos
 typedef struct {
     int x;
     int y;
 } player;
 
+//funtion to display the screen
 void loadScreen(player p) {
 
-    // Print the screen
+    // looping through the 1d array 
+    //using x and y to break in to 2d 
     for (int y = 0; y < ScreenY; y++) {
         for (int x = 0; x < ScreenX; x++) {
             if (p.x == x && p.y == y) {
-                printf("&"); // Player
+                printf("&"); //player symobol
             } else {
-                printf(".");
+                printf("."); // empty space
             }
         }
-        printf("\n");
+        printf("\n");//new line 
     }
 }
 
 int main() {
-    char input;
+    char input; //user input
 
-    srand(time(NULL));
-
+    //initalising player at center
     player player1;
     player1.x = ScreenX/2;     
     player1.y = ScreenY/2; 
 
+    //game loop (q to quit)
     while (input != 'q') {
-        loadScreen(player1);
+        loadScreen(player1);//loading the display with player pos
 
+        //asking and taking the users input
         printf("use w/a/s/d to move, press q to quit: ");
         scanf(" %c", &input); 
 
+        //moving player pos based on input 
         switch (input) {
 			  break;
 			case 'w':
