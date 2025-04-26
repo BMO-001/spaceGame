@@ -32,7 +32,7 @@ typedef struct {
 
 // funtion to generate astroids
 void genAstroids( astroidData *astroids){
-    for (int i; i < maxAstroids; i++){
+    for (int i = 0; i < maxAstroids; i++){
         int side = rand() % 4;
 
         switch (side) {
@@ -82,25 +82,38 @@ void genMap(mapData *map){
 
 //funtion to display the screen
 void loadScreen(player *p, mapData *map, astroidData *astroids) {
+    
+        // updating the astroid pos based on their trajectry
+        for (int i = 0; i < maxAstroids; i++) {
+            astroids[i].x += astroids[i].dx;
+            astroids[i].y += astroids[i].dy;
+    
+            int index = astroids[i].y * ScreenX + astroids[i].x;
+            strcpy(map[index].type, "Astro");
+            map[index].movable = false;
+        }
 
     // looping through the 1d array 
-    //using x and y to break in to 2d 
+    //using x and y to break in to 2d w
     for (int y = 0; y < ScreenY; y++) {
         for (int x = 0; x < ScreenX; x++) {
             int i = y * ScreenX + x;
+
             if (p->x == x && p->y == y) {
                 printf("&"); //player symobol
             } else if (strcmp(map[i].type, "Trash") == 0) {
                 printf("#"); // trash
+            } else if (strcmp(map[i].type, "Astro") == 0) {
+                printf("@"); // astroid
             } else {
                 printf("."); // empty space
             }
-            for (int a = 0; a < maxAstroids; a++) {
-                if (astroids[a].x == x && astroids[a].y == y) {
-                    printf("O"); // asteroid symbol
-                    break; // stop checking other asteroids
-                }
-            }
+                
+
+            if (strcmp(map[i].type, "Trash") != 0) {
+                strcpy(map[i].type, "Empty");
+                map[i].movable = true;}
+            
         }
         printf("\n");//new line 
     }
