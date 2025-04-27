@@ -8,6 +8,8 @@
 int ScreenX = 40;
 int ScreenY = 20;
 
+int trashCollection = 0;
+
 int maxAstroids = 5;
 
 //struct for the payer pos
@@ -53,9 +55,58 @@ void genAstroids( astroidData *astroids){
             astroids[i].y = rand() % ScreenY;
                 break;
         }
+
         astroids[i].dx = (rand() % 3) - 1;
         astroids[i].dy = (rand() % 3) - 1;
+        while (astroids[i].dx == 0 && astroids[i].dy == 0){
+            astroids[i].dx = (rand() % 3) - 1;
+            astroids[i].dy = (rand() % 3) - 1;
+        }
     }
+}
+
+void astroidLoop(astroidData *astroids, mapData *map){
+            // updating the astroid pos based on their trajectry
+            for (int i = 0; i < maxAstroids; i++) {
+                astroids[i].x += astroids[i].dx;
+                astroids[i].y += astroids[i].dy;
+    
+                if (astroids[i].x < 0 || astroids[i].x >= ScreenX ||
+                    astroids[i].y < 0 || astroids[i].y >= ScreenY) {
+                        int side = rand() % 4;
+
+        switch (side) {
+            case 0: // top
+            astroids[i].x = rand() % ScreenX;
+            astroids[i].y = 0;
+                break;
+            case 1: // right
+            astroids[i].x = ScreenX - 1;
+            astroids[i].y = rand() % ScreenY;
+                break;
+            case 2: // bottom
+            astroids[i].x = rand() % ScreenX;
+            astroids[i].y = ScreenY - 1;
+                break;
+            case 3: // left
+            astroids[i].x = 0;
+            astroids[i].y = rand() % ScreenY;
+                break;
+        }
+
+        astroids[i].dx = (rand() % 3) - 1;
+        astroids[i].dy = (rand() % 3) - 1;
+        while (astroids[i].dx == 0 && astroids[i].dy == 0){
+            astroids[i].dx = (rand() % 3) - 1;
+            astroids[i].dy = (rand() % 3) - 1;
+        }
+                }
+        
+                int index = astroids[i].y * ScreenX + astroids[i].x;
+                strcpy(map[index].type, "Astro");
+                map[index].movable = false;
+            }
+
 }
 // funtion to generate the map 
 void genMap(mapData *map){
@@ -82,22 +133,19 @@ void genMap(mapData *map){
 
 //funtion to display the screen
 void loadScreen(player *p, mapData *map, astroidData *astroids) {
-    
-        // updating the astroid pos based on their trajectry
-        for (int i = 0; i < maxAstroids; i++) {
-            astroids[i].x += astroids[i].dx;
-            astroids[i].y += astroids[i].dy;
-    
-            int index = astroids[i].y * ScreenX + astroids[i].x;
-            strcpy(map[index].type, "Astro");
-            map[index].movable = false;
-        }
+
+    astroidLoop(astroids, map);
 
     // looping through the 1d array 
     //using x and y to break in to 2d w
     for (int y = 0; y < ScreenY; y++) {
         for (int x = 0; x < ScreenX; x++) {
             int i = y * ScreenX + x;
+
+            if (p->x == x && p->y == y && (strcmp(map[i].type, "Trash") == 0) ) { 
+                strcpy(map[i].type, "Empty");
+                trashCollection++;
+            }
 
             if (p->x == x && p->y == y) {
                 printf("&"); //player symobol
@@ -110,6 +158,7 @@ void loadScreen(player *p, mapData *map, astroidData *astroids) {
             }
                 
 
+            
             if (strcmp(map[i].type, "Trash") != 0) {
                 strcpy(map[i].type, "Empty");
                 map[i].movable = true;}
@@ -141,7 +190,7 @@ int main() {
         loadScreen(&player1, map, astroids);//loading the display with player pos
 
         //asking and taking the users input
-        printf("use w/a/s/d to move, press q to quit: ");
+        printf("( %d )use w/a/s/d to move, press q to quit: ", trashCollection);
         scanf(" %c", &input); 
 
         //moving player pos based on input 
