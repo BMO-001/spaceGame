@@ -7,6 +7,7 @@
 // setting the size of the "display"
 int ScreenX = 20;
 int ScreenY = 10;
+int astroidDamage = 100;
 
 char globalEventFlag[10]; 
 
@@ -20,6 +21,8 @@ typedef struct {
     int y;
     int hp;
     int maxHp;
+    int fule;
+    int maxFule;
 } player;
 
 //struct for map pos data
@@ -146,6 +149,9 @@ void genMap(mapData *map){
 void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected) {
     int i = p->y * ScreenX + p->x;
 
+    //fule used
+    p->fule -=1;
+
     // player collision and collection check
     if (strcmp(map[i].type, "Trash") == 0) {
         strcpy(map[i].type, "Empty");
@@ -153,6 +159,13 @@ void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCo
     } else if (strcmp(map[i].type, "Astro") == 0) {
         p->hp -= 50;
         if (p->hp < 0) p->hp = 0;
+    }  
+    
+    //fule check 
+    if (p->fule <= 0 ){
+        printf("\nYou ran out of fule!!\n");
+        strcpy(globalEventFlag, "DEAD");
+        return;
     }
 
     // health check
@@ -173,6 +186,30 @@ void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCo
     // No trash left
     strcpy(globalEventFlag, "LEVEL_UP");
 }
+void nextLevelLoad(player *p, mapData *map, astroidData *astroids){
+    int upgrade;
+
+    printf("\n \n \n \n \n \n \n Congratulations Traveler, Level Complete \n");
+    printf("use the trash you collected to upgrade your ship:\n");
+    printf("1. no actrion, go to next levle \n");
+    printf("2. increase your fule tank size (10 trash) ");
+    printf("3. somethings... \n");
+    printf("please enter your choice  1-2-3: ");
+    scanf(" %d", &upgrade);
+
+    if (upgrade == 2) {
+        trashCollection -= 10;
+        p->maxFule += 20;
+    } 
+
+    //gen next level data
+    genMap(map);
+    genAstroids(astroids);
+    p->x = ScreenX/2;
+    p->y = ScreenY/2;
+    p->fule = p->maxFule;
+
+}
 
 
 //funtion to display the screen
@@ -180,7 +217,7 @@ void loadScreen(player *p, mapData *map, astroidData *astroids) {
 
     astroidLoop(astroids, map);
 
-    printf("HP: %d/%d | Trash: %d\n", p->hp, p->maxHp, trashCollection);
+    printf("fule: %d/%d | Trash: %d\n", p->fule, p->maxFule, trashCollection);
 
     // looping through the 1d array 
     //using x and y to break in to 2d w
@@ -214,6 +251,8 @@ int main() {
     player1.y = ScreenY/2; 
     player1.hp = 100;
     player1.maxHp = 100;
+    player1.fule = 50;
+    player1.maxFule = 50;
 
     mapData map[ScreenX * ScreenY];
     astroidData astroids[maxAstroids];
@@ -224,13 +263,14 @@ int main() {
 
     //game loop (q to quit)
     while (input != 'q') {
-        loadScreen(&player1, map, astroids);//loading the display with player pos
 
         if (strcmp(globalEventFlag, "DEAD") == 0) {
             break;
         } else if (strcmp(globalEventFlag, "LEVEL_UP") == 0) {
-            printf("NEXT LEVEL \n \n \n ");
+            nextLevelLoad(&player1, map, astroids);
         }
+
+        loadScreen(&player1, map, astroids);//loading the display with player pos
 
         //asking and taking the users input
         printf("use w/a/s/d to move, press q to quit: ");
@@ -255,7 +295,7 @@ int main() {
         }
 
         strcpy(globalEventFlag, ""); // reset flag
-        
+
         gameLoopCheck(&player1, map, astroids, &trashCollection);
 
     }
