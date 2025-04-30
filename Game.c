@@ -5,8 +5,10 @@
 #include <string.h>
 
 // setting the size of the "display"
-int ScreenX = 40;
-int ScreenY = 20;
+int ScreenX = 20;
+int ScreenY = 10;
+
+char globalEventFlag[10]; 
 
 int trashCollection = 0;
 
@@ -16,6 +18,8 @@ int maxAstroids = 5;
 typedef struct {
     int x;
     int y;
+    int hp;
+    int maxHp;
 } player;
 
 //struct for map pos data
@@ -66,6 +70,14 @@ void genAstroids( astroidData *astroids){
 }
 
 void astroidLoop(astroidData *astroids, mapData *map){
+
+        // cleering the map of old astroids to remove goshts
+        for (int i = 0; i < ScreenX * ScreenY; i++) {
+            if (strcmp(map[i].type, "Astro") == 0) {
+                strcpy(map[i].type, "Empty");
+                map[i].movable = true;
+            }
+        }
             // updating the astroid pos based on their trajectry
             for (int i = 0; i < maxAstroids; i++) {
                 astroids[i].x += astroids[i].dx;
@@ -131,21 +143,50 @@ void genMap(mapData *map){
 
 }
 
+void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected) {
+    int i = p->y * ScreenX + p->x;
+
+    // player collision and collection check
+    if (strcmp(map[i].type, "Trash") == 0) {
+        strcpy(map[i].type, "Empty");
+        (*trashCollected)++;
+    } else if (strcmp(map[i].type, "Astro") == 0) {
+        p->hp -= 50;
+        if (p->hp < 0) p->hp = 0;
+    }
+
+    // health check
+    if (p->hp <= 0) {
+        printf("\nYou were destroyed by asteroids!\n");
+        strcpy(globalEventFlag, "DEAD");
+        return;
+    }
+
+    // trash left check (next level)
+    for (int j = 0; j < ScreenX * ScreenY; j++) {
+        if (strcmp(map[j].type, "Trash") == 0) {
+            strcpy(globalEventFlag, ""); // game continues
+            return;
+        }
+    }
+
+    // No trash left
+    strcpy(globalEventFlag, "LEVEL_UP");
+}
+
+
 //funtion to display the screen
 void loadScreen(player *p, mapData *map, astroidData *astroids) {
 
     astroidLoop(astroids, map);
+
+    printf("HP: %d/%d | Trash: %d\n", p->hp, p->maxHp, trashCollection);
 
     // looping through the 1d array 
     //using x and y to break in to 2d w
     for (int y = 0; y < ScreenY; y++) {
         for (int x = 0; x < ScreenX; x++) {
             int i = y * ScreenX + x;
-
-            if (p->x == x && p->y == y && (strcmp(map[i].type, "Trash") == 0) ) { 
-                strcpy(map[i].type, "Empty");
-                trashCollection++;
-            }
 
             if (p->x == x && p->y == y) {
                 printf("&"); //player symobol
@@ -156,12 +197,6 @@ void loadScreen(player *p, mapData *map, astroidData *astroids) {
             } else {
                 printf("."); // empty space
             }
-                
-
-            
-            if (strcmp(map[i].type, "Trash") != 0) {
-                strcpy(map[i].type, "Empty");
-                map[i].movable = true;}
             
         }
         printf("\n");//new line 
@@ -177,6 +212,8 @@ int main() {
     player player1;
     player1.x = ScreenX/2;     
     player1.y = ScreenY/2; 
+    player1.hp = 100;
+    player1.maxHp = 100;
 
     mapData map[ScreenX * ScreenY];
     astroidData astroids[maxAstroids];
@@ -189,28 +226,38 @@ int main() {
     while (input != 'q') {
         loadScreen(&player1, map, astroids);//loading the display with player pos
 
-        //asking and taking the users input
-        printf("( %d )use w/a/s/d to move, press q to quit: ", trashCollection);
-        scanf(" %c", &input); 
+        if (strcmp(globalEventFlag, "DEAD") == 0) {
+            break;
+        } else if (strcmp(globalEventFlag, "LEVEL_UP") == 0) {
+            printf("NEXT LEVEL \n \n \n ");
+        }
 
+        //asking and taking the users input
+        printf("use w/a/s/d to move, press q to quit: ");
+        scanf(" %c", &input); 
+    
         //moving player pos based on input 
         switch (input) {
-			  break;
-			case 'w':
-			player1.y--;
-			  break;
-			case 'a':
-            player1.x--;
-			  break;
-			case 's':
-			player1.y++;
-			  break;
-			case 'd':
-			player1.x++;
-			  break;
-			default:
-            break;
-		  }
+            case 'w':
+                player1.y--;
+                break;
+            case 'a':
+                player1.x--;
+                break;
+            case 's':
+                player1.y++;
+                break;
+            case 'd':
+                player1.x++;
+                break;
+            default:
+                break;
+        }
+
+        strcpy(globalEventFlag, ""); // reset flag
+        
+        gameLoopCheck(&player1, map, astroids, &trashCollection);
+
     }
 
     return 0;
