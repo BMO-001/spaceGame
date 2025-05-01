@@ -4,12 +4,14 @@
 #include <stdbool.h>
 #include <string.h>
 
+bool typeCheck(char variable[], char required[]);
+
 // setting the size of the "display"
 int ScreenX = 20;
 int ScreenY = 10;
 int astroidDamage = 100;
-
 char globalEventFlag[10]; 
+int gameLevel;
 
 int trashCollection = 0;
 
@@ -38,6 +40,33 @@ typedef struct {
     int dx;
     int dy;
 } astroidData;
+
+bool typeCheck(char variable[], char required[]) {
+    //variabkle to store type
+    char type[10];
+    //if the variable is a singke "thing" and is a letter than its a character
+    if (strlen(variable) == 1 && ((variable[0] >= 33 && (variable[0] <= 47)) || ((variable[0] >= 58 && variable[0] <= 126)))) {
+        strcpy(type, "char");
+    } else {
+        //if there is a decimal point its a float
+        for (int i=0; i<strlen(variable); i++) {
+            if (variable[i] == '.') {
+                strcpy(type, "float");
+                break;
+            } else if (variable[i] < '0' || variable[i] > '9') {
+                strcpy(type, "string");
+            }else {//otherwise its an int
+                strcpy(type, "int");
+            }
+        }
+    }
+    printf("The character is a: %s\n", type);
+    if (strcmp(type, required) == 0){
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
 // funtion to generate astroids
 void genAstroids( astroidData *astroids){
@@ -149,6 +178,12 @@ void genMap(mapData *map){
 void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected) {
     int i = p->y * ScreenX + p->x;
 
+    //level chaeck
+    if (gameLevel == 10){
+        strcpy(globalEventFlag, "WIN");
+        return;
+    }
+
     //fule used
     p->fule -=1;
 
@@ -187,7 +222,9 @@ void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCo
     strcpy(globalEventFlag, "LEVEL_UP");
 }
 void nextLevelLoad(player *p, mapData *map, astroidData *astroids){
-    int upgrade;
+
+    gameLevel ++;
+    char upgrade[10];
 
     printf("\n \n \n \n \n \n \n Congratulations Traveler, Level Complete \n");
     printf("use the trash you collected to upgrade your ship:\n");
@@ -195,9 +232,13 @@ void nextLevelLoad(player *p, mapData *map, astroidData *astroids){
     printf("2. increase your fule tank size (10 trash) ");
     printf("3. somethings... \n");
     printf("please enter your choice  1-2-3: ");
-    scanf(" %d", &upgrade);
+    scanf(" %s", &upgrade);
 
-    if (upgrade == 2) {
+    while ((typeCheck(upgrade, "int")) == 0){
+        printf("please enter your choice  1-2-3: ");
+        scanf(" %s", &upgrade);
+        }
+    if (upgrade[0] == '2') {
         trashCollection -= 10;
         p->maxFule += 20;
     } 
@@ -217,7 +258,7 @@ void loadScreen(player *p, mapData *map, astroidData *astroids) {
 
     astroidLoop(astroids, map);
 
-    printf("fule: %d/%d | Trash: %d\n", p->fule, p->maxFule, trashCollection);
+    printf("fule: %d/%d | Trash: %d | level: %d\n", p->fule, p->maxFule, trashCollection, gameLevel);
 
     // looping through the 1d array 
     //using x and y to break in to 2d w
@@ -245,6 +286,8 @@ int main() {
 
     srand(time(NULL));//setting random seed 
 
+    gameLevel = 9;
+
     //initalising player at center
     player player1;
     player1.x = ScreenX/2;     
@@ -268,6 +311,9 @@ int main() {
             break;
         } else if (strcmp(globalEventFlag, "LEVEL_UP") == 0) {
             nextLevelLoad(&player1, map, astroids);
+        } else if  (strcmp(globalEventFlag, "WIN") == 0){
+            printf("wou won!!!!");
+            break;
         }
 
         loadScreen(&player1, map, astroids);//loading the display with player pos
