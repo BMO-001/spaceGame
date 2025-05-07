@@ -6,9 +6,11 @@
 
 bool typeCheck(char variable[], char required[]);
 
+char input; //user input
+
 // setting the size of the "display"
-int ScreenX = 20;
-int ScreenY = 10;
+int ScreenX = 30;
+int ScreenY = 15;
 int astroidDamage = 100;
 char globalEventFlag[10]; 
 int gameLevel;
@@ -40,6 +42,17 @@ typedef struct {
     int dx;
     int dy;
 } astroidData;
+
+bool typeCheck(char variable[], char required[]);
+void genAstroids(astroidData *astroids);
+void astroidLoop(astroidData *astroids, mapData *map);
+void genMap(mapData *map);
+void readFile();
+void writeFile();
+void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected);
+void nextLevelLoad(player *p, mapData *map, astroidData *astroids);
+void loadScreen(player *p, mapData *map, astroidData *astroids);
+void initaliseGame(player *p, mapData *map, astroidData *astroids);
 
 bool typeCheck(char variable[], char required[]) {
     //variabkle to store type
@@ -175,7 +188,34 @@ void genMap(mapData *map){
 
 }
 
+void readFile(){
+    char txt[200];
+    char null;
+    FILE *fptr;
+    fptr = fopen("gametxt.txt", "r");
+        while (fgets(txt, 200, fptr)) {
+            printf("%s", txt);
+        }
+        fclose(fptr);
+        printf("Press any key to load:  ");
+        scanf(" %c", &null);
+
+}
+
+void writeFile(){
+    FILE *fptr;
+    fptr = fopen("leaderboard.txt", "a");
+    fprintf(fptr, "Level: %d\n", (gameLevel));
+            fclose(fptr);
+    }
+
 void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected) {
+
+if (p->x < 0) p->x = 0;
+if (p->x >= ScreenX) p->x = ScreenX - 1;
+if (p->y < 0) p->y = 0;
+if (p->y >= ScreenY) p->y = ScreenY - 1;
+
     int i = p->y * ScreenX + p->x;
 
     //level chaeck
@@ -281,28 +321,31 @@ void loadScreen(player *p, mapData *map, astroidData *astroids) {
     }
 }
 
-int main() {
-    char input; //user input
-
-    srand(time(NULL));//setting random seed 
+void initaliseGame(player *p, mapData *map, astroidData *astroids) {
+    srand(time(NULL));
+    readFile();
 
     gameLevel = 9;
 
-    //initalising player at center
-    player player1;
-    player1.x = ScreenX/2;     
-    player1.y = ScreenY/2; 
-    player1.hp = 100;
-    player1.maxHp = 100;
-    player1.fule = 50;
-    player1.maxFule = 50;
+    p->x = ScreenX / 2;
+    p->y = ScreenY / 2;
+    p->hp = 100;
+    p->maxHp = 100;
+    p->fule = 50;
+    p->maxFule = 50;
 
+    genMap(map);
+    genAstroids(astroids);
+}
+
+int main() {
+
+    //initalising structs
+    player player1;
     mapData map[ScreenX * ScreenY];
     astroidData astroids[maxAstroids];
 
-    genAstroids(astroids);
-
-    genMap(map);
+    initaliseGame(&player1, map, astroids);
 
     //game loop (q to quit)
     while (input != 'q') {
@@ -345,6 +388,7 @@ int main() {
         gameLoopCheck(&player1, map, astroids, &trashCollection);
 
     }
+    writeFile();
 
     return 0;
 }
