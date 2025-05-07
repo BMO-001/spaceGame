@@ -6,14 +6,15 @@
 #include "gamefunction.h"
 
 // Global variable definitions
-int ScreenX = 20;
-int ScreenY = 10;
+int ScreenX = 40;
+int ScreenY = 20;
 int astroidDamage = 100;
 char globalEventFlag[10]; 
 int gameLevel;
-int trashCollection = 0;
-int maxAstroids = 5;
+int trashCollection;
+int maxAstroids;
 char input; 
+char null;
 
 bool typeCheck(char variable[], char required[]) {
     //variabkle to store type
@@ -34,7 +35,7 @@ bool typeCheck(char variable[], char required[]) {
             }
         }
     }
-    printf("The character is a: %s\n", type);
+    //printf("the character is a: %s\n", type);
     if (strcmp(type, required) == 0){
         return 1;
     } else {
@@ -118,12 +119,12 @@ void astroidLoop(astroidData *astroids, mapData *map){
             astroids[i].dx = (rand() % 3) - 1;
             astroids[i].dy = (rand() % 3) - 1;
         }
-                }
+    }
         
-                int index = astroids[i].y * ScreenX + astroids[i].x;
-                strcpy(map[index].type, "Astro");
-                map[index].movable = false;
-            }
+    int index = astroids[i].y * ScreenX + astroids[i].x;
+    strcpy(map[index].type, "Astro");
+    map[index].movable = false;
+}
 
 }
 // funtion to generate the map 
@@ -151,7 +152,6 @@ void genMap(mapData *map){
 
 void readFile(){
     char txt[200];
-    char null;
     FILE *fptr;
     fptr = fopen("gametxt.txt", "r");
         while (fgets(txt, 200, fptr)) {
@@ -164,11 +164,20 @@ void readFile(){
 }
 
 void writeFile(){
+    int fscore;
     FILE *fptr;
-    fptr = fopen("leaderboard.txt", "a");
-    fprintf(fptr, "Level: %d\n", (gameLevel));
+    fptr = fopen("bestScore.txt", "r");
+    fscanf(fptr, "%d", &fscore); 
+    printf("the current highets score was %d\n", fscore);
+    printf("you scored:  %d\n", gameLevel);
+
+    if ( gameLevel > fscore){
+    fptr = fopen("bestScore.txt", "w");
+    fprintf(fptr, "%d\n", (gameLevel));
             fclose(fptr);
     }
+}
+    
 
 void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected) {
 
@@ -193,7 +202,8 @@ if (p->y >= ScreenY) p->y = ScreenY - 1;
         strcpy(map[i].type, "Empty");
         (*trashCollected)++;
     } else if (strcmp(map[i].type, "Astro") == 0) {
-        p->hp -= 50;
+        printf("hittttt");
+        p->hp -= 100;
         if (p->hp < 0) p->hp = 0;
     }  
     
@@ -233,11 +243,11 @@ void nextLevelLoad(player *p, mapData *map, astroidData *astroids){
     printf("2. increase your fule tank size (10 trash) ");
     printf("3. somethings... \n");
     printf("please enter your choice  1-2-3: ");
-    scanf(" %s", &upgrade);
+    scanf(" %s", upgrade);
 
     while ((typeCheck(upgrade, "int")) == 0){
         printf("please enter your choice  1-2-3: ");
-        scanf(" %s", &upgrade);
+        scanf(" %s", upgrade);
         }
     if (upgrade[0] == '2') {
         trashCollection -= 10;
@@ -256,8 +266,6 @@ void nextLevelLoad(player *p, mapData *map, astroidData *astroids){
 
 //funtion to display the screen
 void loadScreen(player *p, mapData *map, astroidData *astroids) {
-
-    astroidLoop(astroids, map);
 
     printf("fule: %d/%d | Trash: %d | level: %d\n", p->fule, p->maxFule, trashCollection, gameLevel);
 
@@ -286,15 +294,53 @@ void initaliseGame(player *p, mapData *map, astroidData *astroids) {
     srand(time(NULL));
     readFile();
 
+    setDifficulty(p);
+
     gameLevel = 9;
 
     p->x = ScreenX / 2;
     p->y = ScreenY / 2;
-    p->hp = 100;
-    p->maxHp = 100;
-    p->fule = 50;
-    p->maxFule = 50;
-
+    trashCollection = 0;
     genMap(map);
     genAstroids(astroids);
+}
+
+void setDifficulty(player *p) {
+    char choice[10];
+
+    printf("Select Difficulty:\n");
+    printf("1. Easy   (More fuel, less asteroids)\n");
+    printf("2. Normal (Balanced)\n");
+    printf("3. Hard   (Less fuel, more asteroids)\n");
+    printf("Enter 1-3: ");
+    scanf("%s", choice);
+
+    while ((typeCheck(choice, "int")) == 0){
+        printf("please enter your choice  1-2-3: ");
+        scanf(" %s", choice);
+        }
+
+    switch (choice[0]) {
+        case '1': // Easy
+            maxAstroids = 5;
+            p->hp = 100;
+            p->maxHp = 100;
+            p->fule = 60;
+            p->maxFule = 60;
+            break;
+        case '2': // Normal
+            maxAstroids = 10;
+            p->hp = 100;
+            p->maxHp = 100;
+            p->fule = 50;
+            p->maxFule = 50;
+            break;
+        case '3': // Hard
+            maxAstroids = 15;
+            p->hp = 100;
+            p->maxHp = 100;
+            p->fule = 1000;
+            p->maxFule = 1000;
+            break;
+    }
 }

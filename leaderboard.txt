@@ -1,4 +1,0 @@
-Level: 10
-Level: 9
-Level: 9
-Level: 9

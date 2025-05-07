@@ -45,5 +45,6 @@ void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCo
 void nextLevelLoad(player *p, mapData *map, astroidData *astroids);
 void loadScreen(player *p, mapData *map, astroidData *astroids);
 void initaliseGame(player *p, mapData *map, astroidData *astroids);
+void setDifficulty(player *p);
 
 #endif 

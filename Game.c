@@ -13,16 +13,20 @@ int main() {
     while (input != 'q') {
 
         if (strcmp(globalEventFlag, "DEAD") == 0) {
+            writeFile();
             break;
         } else if (strcmp(globalEventFlag, "LEVEL_UP") == 0) {
             nextLevelLoad(&player1, map, astroids);
         } else if  (strcmp(globalEventFlag, "WIN") == 0){
             printf("wou won!!!!");
+            printf("Press any key to load:  ");
+            scanf(" %c", &null);
             break;
         }
-
+        strcpy(globalEventFlag, ""); // reset flag
+        
         loadScreen(&player1, map, astroids);//loading the display with player pos
-
+        
         //asking and taking the users input
         printf("use w/a/s/d to move, press q to quit: ");
         scanf(" %c", &input); 
@@ -45,12 +49,14 @@ int main() {
                 break;
         }
 
-        strcpy(globalEventFlag, ""); // reset flag
+        gameLoopCheck(&player1, map, astroids, &trashCollection);
 
+        astroidLoop(astroids, map);
+
+        
         gameLoopCheck(&player1, map, astroids, &trashCollection);
 
     }
-    writeFile();
 
     return 0;
 }
