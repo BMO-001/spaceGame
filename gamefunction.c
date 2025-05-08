@@ -194,9 +194,6 @@ if (p->y >= ScreenY) p->y = ScreenY - 1;
         return;
     }
 
-    //fule used
-    p->fule -=1;
-
     // player collision and collection check
     if (strcmp(map[i].type, "Trash") == 0) {
         strcpy(map[i].type, "Empty");

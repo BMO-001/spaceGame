@@ -55,6 +55,8 @@ int main() {
 
         
         gameLoopCheck(&player1, map, astroids, &trashCollection);
+        
+        player1.fule -=1;
 
     }
 
