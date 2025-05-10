@@ -1,4 +1,4 @@
 Welcome, weary traveler!!
-Your goal is to collect space trash.
-AVOID the asteroids.
+Your goal is to collect space trash
+AVOID the asteroids
 Reach your high score!
