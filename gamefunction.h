@@ -41,7 +41,7 @@ void astroidLoop(astroidData *astroids, mapData *map);
 void genMap(mapData *map);
 void readFile();
 void writeFile();
-void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected);
+void gameLoopCheck(player *p, mapData *map, astroidData *asteroids);
 void nextLevelLoad(player *p, mapData *map, astroidData *astroids);
 void loadScreen(player *p, mapData *map, astroidData *astroids);
 void initaliseGame(player *p, mapData *map, astroidData *astroids);

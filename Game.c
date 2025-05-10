@@ -23,7 +23,7 @@ int main() {
             printf("Press any key to continue:  ");
             scanf(" %c", &null);
         }
-        strcpy(globalEventFlag, ""); // reset flag
+        strcpy(globalEventFlag, ""); // reseting flag
         
         loadScreen(&player1, map, astroids);//loading the display with player pos
         
@@ -49,12 +49,12 @@ int main() {
                 break;
         }
 
-        gameLoopCheck(&player1, map, astroids, &trashCollection);
+        gameLoopCheck(&player1, map, astroids);
 
         astroidLoop(astroids, map);
 
         
-        gameLoopCheck(&player1, map, astroids, &trashCollection);
+        gameLoopCheck(&player1, map, astroids);
         
         player1.fule -=1;
 

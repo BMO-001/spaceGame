@@ -5,7 +5,7 @@
 #include <time.h>
 #include "gamefunction.h"
 
-// Global variable definitions
+// global variable definitions
 int ScreenX ;
 int ScreenY ;
 int astroidDamage = 100;
@@ -177,7 +177,7 @@ void writeFile(){
 }
     
 
-void gameLoopCheck(player *p, mapData *map, astroidData *asteroids, int *trashCollected) {
+void gameLoopCheck(player *p, mapData *map, astroidData *asteroids) {
 
 if (p->x < 0) p->x = 0;
 if (p->x >= ScreenX) p->x = ScreenX - 1;
@@ -195,7 +195,7 @@ if (p->y >= ScreenY) p->y = ScreenY - 1;
     // player collision and collection check
     if (strcmp(map[i].type, "Trash") == 0) {
         strcpy(map[i].type, "Empty");
-        (*trashCollected)++;
+        trashCollection++;
     } else if (strcmp(map[i].type, "Astro") == 0) {
         printf("hittttt");
         p->hp -= 100;
@@ -299,7 +299,7 @@ void loadScreen(player *p, mapData *map, astroidData *astroids) {
     printf("fule: %d/%d | Trash: %d | level: %d\n", p->fule, p->maxFule, trashCollection, gameLevel);
 
     // looping through the 1d array 
-    //using x and y to break in to 2d w
+    //using x and y to break in to 2d 
     for (int y = 0; y < ScreenY; y++) {
         for (int x = 0; x < ScreenX; x++) {
             int i = y * ScreenX + x;
@@ -323,7 +323,7 @@ void initaliseGame(player *p, mapData *map, astroidData *astroids) {
     srand(time(NULL));
     readFile();
 
-    gameLevel = 9;
+    gameLevel = 1;
 
     p->x = ScreenX / 2;
     p->y = ScreenY / 2;
@@ -364,7 +364,7 @@ void setDifficulty(player *p) {
             p->hp = 100;
             p->maxHp = 100;
             p->fule = 80;
-            p->maxFule = 50;
+            p->maxFule = 80;
             break;
         case '3': // Hard
             ScreenX = 40;
