@@ -4,6 +4,7 @@ int main() {
 
     //initalising structs
     player player1;
+    setDifficulty(&player1);
     mapData map[ScreenX * ScreenY];
     astroidData astroids[maxAstroids];
 
@@ -19,9 +20,8 @@ int main() {
             nextLevelLoad(&player1, map, astroids);
         } else if  (strcmp(globalEventFlag, "WIN") == 0){
             printf("wou won!!!!");
-            printf("Press any key to load:  ");
+            printf("Press any key to continue:  ");
             scanf(" %c", &null);
-            break;
         }
         strcpy(globalEventFlag, ""); // reset flag
         
